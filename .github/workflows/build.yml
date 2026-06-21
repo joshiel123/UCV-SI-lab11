@@ -4,16 +4,15 @@ on:
   push:
     branches:
       - main
-      - develop
   pull_request:
     types: [opened, synchronize, reopened]
     branches:
-      - develop
+      - main
 
 jobs:
   sonarqube:
     name: SonarQube Quality Gate
-    runs-on: windows-latest
+    runs-on: ubuntu-latest
     steps:
       - name: Checkout Code Base
         uses: actions/checkout@v4
@@ -29,7 +28,7 @@ jobs:
         run: |
           python -m pip install --upgrade pip
           pip install pytest pytest-cov
-          if (Test-Path requirements.txt) { pip install -r requirements.txt }
+          if [ -f requirements.txt ]; then pip install -r requirements.txt; fi
 
       - name: Execute Pipeline Testing and Compile Telemetry
         run: |
