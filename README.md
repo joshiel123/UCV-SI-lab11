@@ -4,75 +4,120 @@
 [![SonarCloud Quality Gate](https://img.shields.io/badge/SonarCloud-Passed-brightgreen?logo=sonarcloud)](https://sonarcloud.io/dashboard?id=joshiel123_UCV-SI-lab11)
 [![SonarCloud Coverage](https://img.shields.io/badge/Coverage-100%25-brightgreen?logo=sonarcloud)](https://sonarcloud.io/dashboard?id=joshiel123_UCV-SI-lab11)
 
-Este repositorio contiene la implementación y análisis de algoritmos de búsqueda adversaria para el laboratorio de Inteligencia Artificial. Se comparan el algoritmo clásico **Minimax** y su versión optimizada **Poda Alfa-Beta**, además de resolver el reto adicional mediante la creación de un juego de Tres en Raya con un agente de IA invencible.
+Este repositorio contiene la implementación y análisis comparativo de algoritmos de búsqueda adversaria para el laboratorio de Inteligencia Artificial. El proyecto se compone de dos partes fundamentales:
+
+1. **Comparador y Auditoría de Rendimiento**: Evaluación de árboles de juego genéricos mediante Minimax y Poda Alfa-Beta tradicionales.
+2. **Reto Adicional (Tres en Raya)**: Un juego interactivo de Tres en Raya (Tic-Tac-Toe) por consola con una IA invencible usando la estructura de Programación Orientada a Objetos (POO).
 
 ---
 
-## 1. Introducción teórica
+## 1. Introducción Teórica
 
 ### Algoritmo Minimax
-Minimax es un método de decisión empleado en teoría de juegos y toma de decisiones en inteligencia artificial. Su objetivo es encontrar el movimiento óptimo para un jugador, asumiendo que el oponente también juega de manera óptima. Evalúa recursivamente el árbol de juego alternando turnos de maximización (nuestro turno) y minimización (turno del oponente).
+
+Minimax es un método de decisión utilizado en teoría de juegos de suma cero e información perfecta. Su objetivo principal es encontrar la jugada óptima asumiendo que el rival también juega óptimamente. El algoritmo desciende recursivamente por el árbol de juego alternando entre turnos de **Maximización** (nuestro mejor escenario) y **Minimización** (el peor escenario impuesto por el rival).
 
 ### Poda Alfa-Beta
-La Poda Alfa-Beta es una optimización del algoritmo Minimax que reduce drásticamente el número de nodos evaluados en el árbol de búsqueda sin alterar el resultado final. Utiliza dos valores de control:
-- **Alfa ($\alpha$)**: La mejor opción encontrada hasta el momento para el jugador Maximizado (cota inferior).
-- **Beta ($\beta$)**: La mejor opción encontrada hasta el momento para el jugador Minimizado (cota superior).
 
-Si en algún subárbol se detecta que $\beta \leq \alpha$, se detiene la exploración de esa rama (poda) debido a que el jugador previo ya tiene garantizada una mejor opción por otra vía.
+La Poda Alfa-Beta es una optimización del algoritmo Minimax clásico que reduce drásticamente el número de nodos evaluados sin alterar el resultado del juego. Emplea dos cotas durante la búsqueda recursiva:
+
+- **Alfa ($\alpha$)**: El mejor puntaje (máximo) asegurado hasta el momento para el maximizador.
+- **Beta ($\beta$)**: El mejor puntaje (mínimo) asegurado hasta el momento para el minimizador.
+
+Si durante la recursión se cumple que $\beta \leq \alpha$, se poda el subárbol restante, omitiendo cálculos innecesarios.
 
 ---
 
 ## 2. Estructura del Repositorio
 
-El proyecto se encuentra estructurado de la siguiente forma:
-
 ```text
 UCV-SI-lab11/
 ├── src/
 │   ├── __init__.py
-│   ├── alpha_beta.py        # Implementación genérica del algoritmo Poda Alfa-Beta
-│   ├── game_tree.py         # Definición de la estructura de árbol de juego y muestras
-│   ├── main.py              # Punto de entrada de análisis de rendimiento de árboles
-│   ├── minimax.py           # Implementación genérica del algoritmo Minimax clásico
+│   ├── alpha_beta.py        # Algoritmo de Poda Alfa-Beta para árboles de juego genéricos
+│   ├── game_tree.py         # Estructuras de árboles de juego (Simple, Mediano, Optimizado)
+│   ├── main.py              # Auditoría de rendimiento y comparador de velocidad de algoritmos
+│   ├── minimax.py           # Algoritmo de Minimax clásico para árboles de juego genéricos
 │   └── tres_en_raya.py      # [RETO] Lógica de Tres en Raya (POO) y juego interactivo
 ├── tests/
 │   ├── __init__.py
-│   ├── test_algorithms.py   # Pruebas para algoritmos en árboles de juego base
-│   └── test_tres_en_raya.py # [RETO] Pruebas unitarias para el Tres en Raya
-├── requirements.txt         # Dependencias del entorno de Python
+│   ├── test_algorithms.py   # Pruebas unitarias/integración para algoritmos de árboles genéricos
+│   └── test_tres_en_raya.py # [RETO] Pruebas unitarias para Tres en Raya
+├── requirements.txt         # Dependencias necesarias para ejecutar el proyecto (pytest, pytest-cov)
 ├── sonar-project.properties # Configuración del análisis de SonarCloud
-└── README.md                # Documentación del proyecto
+└── README.md                # Documentación del proyecto (este archivo)
 ```
 
 ---
 
-## 3. Estado de la Integración Continua (CI)
+## 3. Parte 1: Comparador y Auditoría de Rendimiento
 
-- **GitHub Actions (CI/CD)**: Configurado para ejecutar el análisis sintáctico y las pruebas unitarias automáticamente con cada push a la rama principal. El estado actual es **Success ✅**.
-- **SonarCloud**: La calidad de código y cobertura del proyecto superan el Quality Gate. Logramos un **100% de cobertura de código** mediante pruebas unitarias exhaustivas en todos los algoritmos y lógica matemática del juego.
+El proyecto modela árboles de juego genéricos mediante tipos anidados utilizando Python TypeAlias:
+`GameTree = int | list["GameTree"]`. Las hojas del árbol representan los puntajes de evaluación final y las sublistas representan las ramas.
 
----
+### Árboles de Prueba Implementados (`src/game_tree.py`):
 
-## 4. Reto Adicional: Tres en Raya (Tic-Tac-Toe)
+1. **Árbol Simple**: `[[3, 5], [2, 9]]` (Evaluación de 2 niveles).
+2. **Árbol Mediano**: `[[[3, 5], [6, 9]], [[1, 2], [0, -1]], [[7, 4], [8, 6]]]` (Evaluación de 3 niveles).
+3. **Árbol Optimizado para Poda**: `[[[10, 9], [8, 7]], [[6, 5], [4, 3]], [[2, 1], [0, -1]]]` (Ordenado estratégicamente para maximizar las podas).
 
-Se ha implementado el clásico juego del Tres en Raya en consola dentro de la clase `TresEnRaya` en `src/tres_en_raya.py`.
+### Ejecutar el Analizador de Rendimiento:
 
-### Comportamiento de la IA
-La computadora actúa como el agente inteligente de forma **invencible**. Para ello, utiliza el algoritmo Minimax con Poda Alfa-Beta para evaluar cada posible jugada hasta el final del juego, garantizando que el usuario humano nunca pueda ganarle (solo se obtienen empates o victorias para la IA).
+Para comparar la consistencia y la velocidad (en milisegundos) de ambos algoritmos en estos árboles estáticos, ejecuta:
 
-### Mapeo de la Consola
-El tablero está representado por una lista de 9 posiciones. Para interactuar con el juego en la consola, las posiciones se mapean del **1 al 9** de la siguiente manera:
+```bash
+python src/main.py
+```
+
+El script imprimirá un reporte detallado con el siguiente formato:
 
 ```text
- 1 | 2 | 3 
------------
- 4 | 5 | 6 
------------
- 7 | 8 | 9 
+============================================================
+      AUDITORÍA DE RENDIMIENTO: MINIMAX VS PODA ALFA-BETA
+============================================================
+
+[+] Analizando: Árbol Simple
+  -> Minimax Clásico : Resultado = 3 | Tiempo = 0.0150 ms
+  -> Poda Alfa-Beta   : Resultado = 3 | Tiempo = 0.0120 ms
+  -> Verificación de Consistencia: ÉXITO ✅
+
+[+] Analizando: Árbol Mediano
+  -> Minimax Clásico : Resultado = 7 | Tiempo = 0.0450 ms
+  -> Poda Alfa-Beta   : Resultado = 7 | Tiempo = 0.0380 ms
+  -> Verificación de Consistencia: ÉXITO ✅
 ```
 
-### Ejecutar el Juego de Consola
-Para jugar interactivamente contra la IA en tu terminal, ejecuta el siguiente comando:
+---
+
+## 4. Parte 2: Reto Adicional - Tres en Raya (Tic-Tac-Toe)
+
+La lógica del juego clásico está encapsulada en la clase `TresEnRaya` dentro de `src/tres_en_raya.py`.
+
+### Inteligencia Artificial Invencible
+
+El agente de computadora ejecuta una versión adaptada del algoritmo Minimax con poda Alfa-Beta para calcular el mejor movimiento posible basándose en la profundidad actual. El sistema penaliza las derrotas y beneficia las victorias más rápidas mediante una puntuación dinámica:
+
+- **Victoria IA**: `10 - profundidad`
+- **Victoria Humano**: `-10 + profundidad`
+- **Empate**: `0`
+
+Esto resulta en un oponente perfecto al que **es imposible ganarle**.
+
+### Formato y Mapeo en Consola
+
+El tablero interactivo se representa en consola con casillas numeradas del **1 al 9**:
+
+```text
+ 1 | 2 | 3
+-----------
+ 4 | 5 | 6
+-----------
+ 7 | 8 | 9
+```
+
+### Ejecutar el Juego de Tres en Raya:
+
+Para iniciar una partida contra la IA en tu terminal:
 
 ```bash
 python src/tres_en_raya.py
@@ -80,34 +125,30 @@ python src/tres_en_raya.py
 
 ---
 
-## 5. Instalación y Ejecución Local
+## 5. Pruebas Unitarias y Cobertura (CI/CD)
 
-Sigue estos pasos para configurar tu entorno y correr las pruebas locales:
+El proyecto cuenta con integración continua configurada en GitHub Actions y SonarCloud. La cobertura de código en todo el proyecto es del **100%**.
 
-### Paso 1: Configurar el Entorno Virtual (Recomendado)
-En tu consola, crea e inicializa un entorno virtual de Python:
+### Instalar dependencias locales:
 
 ```bash
 # Crear entorno virtual
 python -m venv .venv
-
 # Activar entorno virtual (Windows)
 .venv\Scripts\activate
-
 # Activar entorno virtual (Linux/macOS)
 source .venv/bin/activate
-```
 
-### Paso 2: Instalar Dependencias
-Instala los paquetes necesarios definidos en `requirements.txt`:
-
-```bash
+# Instalar dependencias
 pip install -r requirements.txt
 ```
 
-### Paso 3: Ejecutar las Pruebas Unitarias
-Para correr toda la suite de pruebas unitarias y verificar el reporte de cobertura de código (que alcanza el 100%):
+### Correr las pruebas unitarias y generar reporte de cobertura:
+
+Para ejecutar todos los tests (`test_algorithms.py` y `test_tres_en_raya.py`):
 
 ```bash
 pytest --cov=src --cov-report=term-missing
 ```
+
+Esto generará el reporte en terminal demostrando la consistencia de los resultados y que todas las líneas de código (excepto el bucle de ejecución directa del juego de consola marcado con `# pragma: no cover`) están completamente valida das.
